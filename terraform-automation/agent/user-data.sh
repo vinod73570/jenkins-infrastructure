@@ -8,38 +8,48 @@ apt update -y
 apt upgrade -y
 
 # ----------------------------
-# Base required packages
+# Base packages
 # ----------------------------
 apt install -y \
   ca-certificates \
   curl \
+  gnupg \
   unzip \
-  git
+  git \
+  lsb-release
 
 # ----------------------------
-# Install Terraform (binary, pinned)
+# Java (Agent JVM)
 # ----------------------------
-cd /tmp
-curl -LO https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip
-unzip terraform_1.6.6_linux_amd64.zip
-mv terraform /usr/local/bin/
-chmod +x /usr/local/bin/terraform
+apt install -y openjdk-17-jre
 
-# Verify Terraform
-terraform version
 
 # ----------------------------
-# Install AWS CLI v2 (binary)
+# Terraform (HashiCorp repo)
+# ----------------------------
+curl -fsSL https://apt.releases.hashicorp.com/gpg \
+ | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
+https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+ | tee /etc/apt/sources.list.d/hashicorp.list > /dev/null
+
+apt update -y
+apt install -y terraform
+
+# ----------------------------
+# AWS CLI v2
 # ----------------------------
 cd /tmp
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
 unzip awscliv2.zip
 ./aws/install
 
-# Verify AWS CLI
-aws --version
+# ----------------------------
+# Ansible
+sudo apt install -y ansible
 
 # ----------------------------
 # Cleanup
 # ----------------------------
-rm -rf /tmp/aws /tmp/awscliv2.zip /tmp/terraform_1.6.6_linux_amd64.zip
+rm -rf /tmp/aws /tmp/awscliv2.zip
